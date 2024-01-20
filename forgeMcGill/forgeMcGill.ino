@@ -2,11 +2,11 @@
 #include <Servo.h>
 
 //Left motor
-#define L_1A A2
-#define L_1B A3
+#define L_1A 3
+#define L_1B 9
 //Right motor
-#define R_1A A0
-#define R_1B A1
+#define R_1A 10
+#define R_1B 11
 
 //Servo pins
 #define ClubPin = 3;
@@ -20,10 +20,15 @@ int motorpin = 8;
 #define SW_PIN 8  // Arduino pin connected to SW  pin
 ezButton button(SW_PIN);
 
-int x = 0;
-int y = 0;
+#define stop 0
+#define delayTime 100
+
+long x = 0;
+long y = 0;
 int b = 0;
 bool wasPressed = false;
+long speed;
+
 
 void setup() {
   //Right motor setup
@@ -39,6 +44,7 @@ void setup() {
   Serial.begin(9600);
   
   button.setDebounceTime(50); // set debounce time to 50 milliseconds
+  
 }
 
 //function signatures
@@ -77,52 +83,73 @@ void loop() {
     wasPressed = !wasPressed;
   }
 
-  forward(x);
+  long speedt = sqrt((x-510)*(x-510)+(y-513)*(y-513));
+
+  if (speedt < 30) {
+    speed = 0;
+  } else if (speedt <= 256){
+    speed = 100;
+  } else {
+    speed = 200;
+  }
+  
+  if (y >= x && y >= 1024-x) {
+    forward(speed);
+    Serial.println("forward");
+  } else if (y <= x && y <= 1024-x) {
+    backward(speed);
+    Serial.println("backward");
+  } else if (y <= x && y >= 1024-x) {
+    left(speed);
+    Serial.println("left");
+  } else {
+    right(speed);
+    Serial.println("right");
+  }
+  
   Serial.print("x = ");
   Serial.print(x);
   Serial.print(", y = ");
   Serial.println(y);
-  delay(100);
+  Serial.println((x-510)*(x-510));
+  Serial.println((y-513)*(y-513));
+  Serial.println(speed);
+  delay(1000);
 }
 
 //Functions
 
 void forward(int speed) {
-  analogWrite(L_1A, abs(speed-513)/2);
-  analogWrite(L_1B, abs(speed-513)/2);
-  analogWrite(R_1A, abs(speed-513)/2);
-  analogWrite(R_1B, abs(speed-513)/2);
-  delay(100);
+  analogWrite(L_1A, stop);
+  analogWrite(L_1B, speed);
+  analogWrite(R_1A, stop);
+  analogWrite(R_1B, speed);
 }
 
-void right() {
-  digitalWrite(L_1A, LOW);
-  digitalWrite(L_1B, HIGH);
-  digitalWrite(R_1A, HIGH);
-  digitalWrite(R_1B, LOW);
-  delay(100);
+void right(int speed) {
+  analogWrite(L_1A, stop);
+  analogWrite(L_1B, speed);
+  analogWrite(R_1A, speed);
+  analogWrite(R_1B, stop);
 }
 
-void left() {
-  digitalWrite(L_1A, HIGH);
-  digitalWrite(L_1B, LOW);
-  digitalWrite(R_1A, LOW);
-  digitalWrite(R_1B, HIGH);
-  delay(100);
+void left(int speed) {
+  analogWrite(L_1A, speed);
+  analogWrite(L_1B, stop);
+  analogWrite(R_1A, stop);
+  analogWrite(R_1B, speed);
 }
 
-void backward() {
-  digitalWrite(L_1A, HIGH);
-  digitalWrite(L_1B, LOW);
-  digitalWrite(R_1A, HIGH);
-  digitalWrite(R_1B, LOW);
-  delay(100);
+void backward(int speed) {
+  analogWrite(L_1A, speed);
+  analogWrite(L_1B, stop);
+  analogWrite(R_1A, speed);
+  analogWrite(R_1B, stop);
 }
 
 void brake() {
-  digitalWrite(L_1A, LOW);
-  digitalWrite(L_1B, LOW);
-  digitalWrite(R_1A, LOW);
-  digitalWrite(R_1B, LOW);
-  delay(100);
+  analogWrite(L_1A, stop);
+  analogWrite(L_1B, stop);
+  analogWrite(R_1A, stop);
+  analogWrite(R_1B, stop);
 }
