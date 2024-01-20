@@ -9,26 +9,33 @@
 #define R_1B 11
 
 //Servo pins
-#define ClubPin = 3;
 int stop = 90;
 Servo Club;
-int motorpin = 8;
 
-//Joystick
-#define VRX_PIN A4 // Arduino pin connected to VRX pin
-#define VRY_PIN A5 // Arduino pin connected to VRY pin
-#define SW_PIN 8  // Arduino pin connected to SW  pin
-ezButton button(SW_PIN);
+//Drive Joystick
+#define VRX_PIN_Drive A4 // Arduino pin connected to VRX1 pin
+#define VRY_PIN_Drive A5 // Arduino pin connected to VRY1 pin
+#define SW_PIN_Drive 8  // Arduino pin connected to SW1  pin
+ezButton button_Drive(SW_PIN_Drive);
 
 #define stop 0
 #define delayTime 100
 
-long x = 0;
-long y = 0;
-int b = 0;
-bool wasPressed = false;
+#define VRY_PIN_Club A6 // Arduino pin connected to VRY1 pin
+#define SW_PIN_Club 9  // Arduino pin connected to SW1  pin
+ezButton button_Club(SW_PIN_Club);
+
+long x_D = 0;
+long y_D = 0;
+int b_D = 0;
+bool wasPressedDrive = false;
 long speed;
 
+
+int y_C = 0;
+int b_C = 0;
+int position_C = 0;
+bool wasPressedClub = false;
 
 void setup() {
   //Right motor setup
@@ -43,47 +50,47 @@ void setup() {
 
   Serial.begin(9600);
   
-  button.setDebounceTime(50); // set debounce time to 50 milliseconds
-  
+  button_Drive.setDebounceTime(50); // set debounce time to 50 milliseconds
+  button_Club.setDebounceTime(50); // set debounce time to 50 milliseconds
 }
 
 //function signatures
-void forward();
-void right();
-void left();
-void backward();
+void forward(int);
+void right(int);
+void left(int);
+void backward(int);
 void brake();
+void shoot();
+void moveClub(int angle);
 
 void loop() {
 
-  //myservo.write(45);
-  //delay(2000);
-
-  //myservo.write(135);
-  //delay(2000);
-
-  //myservo.write(90);
-  //delay(2000);
-
   // put your main code here, to run repeatedly:
-  button.loop(); // MUST call the loop() function first
-  x = analogRead(VRX_PIN);
-  y = analogRead(VRY_PIN);
+  button_Drive.loop(); // MUST call the loop() function first
+  button_Club.loop(); // MUST call the loop() function first
+
+//Drive
+  x_D = analogRead(VRX_PIN_Drive);
+  y_D = analogRead(VRY_PIN_Drive);
   // Read the button value
-  b = button.getState();
+  b_D = button_Drive.getState();
 
-  if (button.isPressed()) {
-    Serial.println("The button is pressed");
+  if (button_Drive.isPressed()) {
+    Serial.println("The drive button is pressed");
+    wasPressedDrive = true;
     // TODO do something here
   }
 
-  if (button.isReleased()) {
-    Serial.println("The button is released");
+  if (button_Drive.isReleased()) {
+    Serial.println("The drive button is released");
     // TODO do something here
-    wasPressed = !wasPressed;
+    wasPressedDrive = !wasPressedDrive;
+    Serial.println("Shoot!");
+    shoot();
   }
 
-  long speedt = sqrt((x-510)*(x-510)+(y-513)*(y-513));
+  //Drive subsystem
+  long speedt = sqrt((x_D-510)*(x_D-510)+(y_D-513)*(y_D-513));
 
   if (speedt < 30) {
     speed = 0;
@@ -93,13 +100,13 @@ void loop() {
     speed = 200;
   }
   
-  if (y >= x && y >= 1024-x) {
+  if (y_D >= x_D && y_D >= 1024-x_D) {
     forward(speed);
     Serial.println("forward");
-  } else if (y <= x && y <= 1024-x) {
+  } else if (y_D <= x_D && y_D <= 1024-x_D) {
     backward(speed);
     Serial.println("backward");
-  } else if (y <= x && y >= 1024-x) {
+  } else if (y_D <= x_D && y_D >= 1024-x_D) {
     left(speed);
     Serial.println("left");
   } else {
@@ -108,13 +115,50 @@ void loop() {
   }
   
   Serial.print("x = ");
-  Serial.print(x);
+  Serial.print(x_D);
   Serial.print(", y = ");
-  Serial.println(y);
-  Serial.println((x-510)*(x-510));
-  Serial.println((y-513)*(y-513));
+  Serial.println(y_D);
+  Serial.println((x_D-510)*(x_D-510));
+  Serial.println((y_D-513)*(y_D-513));
   Serial.println(speed);
-  delay(1000);
+  delay(100);
+
+  //Club Subsystem
+  y_C = analogRead(VRY_PIN_Club);
+  // Read the button value
+  b_C = button_Club.getState();
+
+  if (button_Club.isPressed()) {
+    Serial.println("The club button is pressed");
+    wasPressedClub = true;
+
+    // TODO do something here
+
+    //move the club forward
+    if((y_C >= 768) && (position_C > 0)){
+      moveClub(-1);
+      position_C -= 1;
+    }
+    //move the club backwards
+    else if(y_C <= 256){
+      moveClub(1);
+      position_C += 1;
+    }
+    else{
+
+    }
+  }
+
+  if (button_Club.isReleased()) {
+    Serial.println("The club button is released");
+    // TODO do something here
+    wasPressedClub = !wasPressedClub;
+  }
+
+  
+  Serial.print(", y_C = ");
+  Serial.println(y_C);
+  delay(100);
 }
 
 //Functions
@@ -152,4 +196,17 @@ void brake() {
   analogWrite(L_1B, stop);
   analogWrite(R_1A, stop);
   analogWrite(R_1B, stop);
+}
+
+void shoot(){
+  Club.write(135);
+  delay(200*position_C);
+  Club.write(90);
+}
+
+void moveClub(int direction){
+  Club.write(90 - direction*45);
+  delay(200);
+  Club.write(90);
+
 }
