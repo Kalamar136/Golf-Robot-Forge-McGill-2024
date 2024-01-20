@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Left motor
-#define L_1A 3
-#define L_1B 9
+#define L_1A 9
+#define L_1B 3
 //Right motor
 #define R_1A 10
 #define R_1B 11
@@ -21,8 +21,8 @@ ezButton button_Drive(SW_PIN_Drive);
 #define stop 0
 #define delayTime 100
 
-#define VRY_PIN_Club A6 // Arduino pin connected to VRY1 pin
-#define SW_PIN_Club 9  // Arduino pin connected to SW1  pin
+#define VRY_PIN_Club A3 // Arduino pin connected to VRY1 pin
+#define SW_PIN_Club 2  // Arduino pin connected to SW1  pin
 ezButton button_Club(SW_PIN_Club);
 
 long x_D = 0;
@@ -45,7 +45,7 @@ void setup() {
   pinMode(R_1B, OUTPUT);
   
   //Club setup
-  Club.attach(9);
+  Club.attach(6);
   Club.write(90);
 
   Serial.begin(9600);
@@ -55,26 +55,59 @@ void setup() {
 }
 
 //function signatures
-void forward(int);
-void right(int);
-void left(int);
-void backward(int);
+void forward(long);
+void right(long);
+void left(long);
+void backward(long);
 void brake();
 void shoot();
 void moveClub(int angle);
 
 void loop() {
 
-  // put your main code here, to run repeatedly:
   button_Drive.loop(); // MUST call the loop() function first
   button_Club.loop(); // MUST call the loop() function first
 
-//Drive
+  //Drive
   x_D = analogRead(VRX_PIN_Drive);
   y_D = analogRead(VRY_PIN_Drive);
   // Read the button value
   b_D = button_Drive.getState();
 
+  //Drive subsystem
+  long speedt = sqrt((x_D-510)*(x_D-510)+(y_D-513)*(y_D-513));
+
+  if (speedt < 30) {
+    speed = 0;
+  } else if (speedt <= 256){
+    speed = 80;
+  } else {
+    speed = 120;
+  }
+  
+  if (y_D >= x_D && y_D >= 1024-x_D) {
+    backward(speed);
+    
+  } else if (y_D <= x_D && y_D <= 1024-x_D) {
+    forward(speed);
+    
+  } else if (y_D <= x_D && y_D >= 1024-x_D) {
+    right(speed);
+    
+  } else {
+    left(speed);
+    
+  }
+  
+  Serial.print("x = ");
+  Serial.print(x_D);
+  Serial.print(", y = ");
+  Serial.println(y_D);
+  Serial.println((x_D-510)*(x_D-510));
+  Serial.println((y_D-513)*(y_D-513));
+  Serial.println(speed);
+
+  //Club Subsystem
   if (button_Drive.isPressed()) {
     Serial.println("The drive button is pressed");
     wasPressedDrive = true;
@@ -88,42 +121,6 @@ void loop() {
     Serial.println("Shoot!");
     shoot();
   }
-
-  //Drive subsystem
-  long speedt = sqrt((x_D-510)*(x_D-510)+(y_D-513)*(y_D-513));
-
-  if (speedt < 30) {
-    speed = 0;
-  } else if (speedt <= 256){
-    speed = 100;
-  } else {
-    speed = 200;
-  }
-  
-  if (y_D >= x_D && y_D >= 1024-x_D) {
-    forward(speed);
-    Serial.println("forward");
-  } else if (y_D <= x_D && y_D <= 1024-x_D) {
-    backward(speed);
-    Serial.println("backward");
-  } else if (y_D <= x_D && y_D >= 1024-x_D) {
-    left(speed);
-    Serial.println("left");
-  } else {
-    right(speed);
-    Serial.println("right");
-  }
-  
-  Serial.print("x = ");
-  Serial.print(x_D);
-  Serial.print(", y = ");
-  Serial.println(y_D);
-  Serial.println((x_D-510)*(x_D-510));
-  Serial.println((y_D-513)*(y_D-513));
-  Serial.println(speed);
-  delay(100);
-
-  //Club Subsystem
   y_C = analogRead(VRY_PIN_Club);
   // Read the button value
   b_C = button_Club.getState();
@@ -144,9 +141,6 @@ void loop() {
       moveClub(1);
       position_C += 1;
     }
-    else{
-
-    }
   }
 
   if (button_Club.isReleased()) {
@@ -155,40 +149,44 @@ void loop() {
     wasPressedClub = !wasPressedClub;
   }
 
-  
   Serial.print(", y_C = ");
   Serial.println(y_C);
-  delay(100);
+  delay(1000);
 }
+
 
 //Functions
 
-void forward(int speed) {
+void forward(long speed) {
   analogWrite(L_1A, stop);
   analogWrite(L_1B, speed);
   analogWrite(R_1A, stop);
   analogWrite(R_1B, speed);
+  Serial.println("forward");
 }
 
-void right(int speed) {
+void right(long speed) {
   analogWrite(L_1A, stop);
   analogWrite(L_1B, speed);
   analogWrite(R_1A, speed);
   analogWrite(R_1B, stop);
+  Serial.println("right");
 }
 
-void left(int speed) {
+void left(long speed) {
   analogWrite(L_1A, speed);
   analogWrite(L_1B, stop);
   analogWrite(R_1A, stop);
   analogWrite(R_1B, speed);
+  Serial.println("left");
 }
 
-void backward(int speed) {
-  analogWrite(L_1A, speed);
-  analogWrite(L_1B, stop);
-  analogWrite(R_1A, speed);
-  analogWrite(R_1B, stop);
+void backward(long speed) {
+  digitalWrite(L_1A, speed);
+  digitalWrite(L_1B, stop);
+  digitalWrite(R_1A, speed);
+  digitalWrite(R_1B, stop);
+  Serial.println("backward");
 }
 
 void brake() {
@@ -196,6 +194,7 @@ void brake() {
   analogWrite(L_1B, stop);
   analogWrite(R_1A, stop);
   analogWrite(R_1B, stop);
+  Serial.println("brake");
 }
 
 void shoot(){
