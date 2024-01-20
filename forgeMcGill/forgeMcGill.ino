@@ -9,21 +9,29 @@
 #define R_1B A1
 
 //Servo pins
-#define ClubPin = 3;
 int stop = 90;
 Servo Club;
-int motorpin = 8;
 
-//Joystick
-#define VRX_PIN A4 // Arduino pin connected to VRX pin
-#define VRY_PIN A5 // Arduino pin connected to VRY pin
-#define SW_PIN 8  // Arduino pin connected to SW  pin
-ezButton button(SW_PIN);
+//Drive Joystick
+#define VRX_PIN_Drive A4 // Arduino pin connected to VRX1 pin
+#define VRY_PIN_Drive A5 // Arduino pin connected to VRY1 pin
+#define SW_PIN_Drive 8  // Arduino pin connected to SW1  pin
+ezButton button_Drive(SW_PIN_Drive);
 
-int x = 0;
-int y = 0;
-int b = 0;
-bool wasPressed = false;
+#define VRX_PIN_Club A6 // Arduino pin connected to VRX1 pin
+#define VRY_PIN_Club A7 // Arduino pin connected to VRY1 pin
+#define SW_PIN_Club 9  // Arduino pin connected to SW1  pin
+ezButton button_Club(SW_PIN_Club);
+
+int x_D = 0;
+int y_D = 0;
+int b_D = 0;
+bool wasPressedDrive = false;
+
+int x_C = 0;
+int y_C = 0;
+int b_C = 0;
+bool wasPressedClub = false;
 
 void setup() {
   //Right motor setup
@@ -60,29 +68,55 @@ void loop() {
   //delay(2000);
 
   // put your main code here, to run repeatedly:
-  button.loop(); // MUST call the loop() function first
-  x = analogRead(VRX_PIN);
-  y = analogRead(VRY_PIN);
-  // Read the button value
-  b = button.getState();
+  button_Drive.loop(); // MUST call the loop() function first
+  button_Club.loop(); // MUST call the loop() function first
 
-  if (button.isPressed()) {
+//Drive
+  x_D = analogRead(VRX_PIN_Drive);
+  y_D = analogRead(VRY_PIN_Drive);
+  // Read the button value
+  b_D = button_Drive.getState();
+
+  if (button_Drive.isPressed()) {
     Serial.println("The button is pressed");
+    wasPressedDrive = true;
     // TODO do something here
   }
 
-  if (button.isReleased()) {
+  if (button_Drive.isReleased()) {
     Serial.println("The button is released");
     // TODO do something here
-    wasPressed = !wasPressed;
+    wasPressedDrive = !wasPressedDrive;
   }
 
-  forward(x);
-  Serial.print("x = ");
-  Serial.print(x);
-  Serial.print(", y = ");
-  Serial.println(y);
+  forward(x_D);
+  Serial.print("x_D = ");
+  Serial.print(x_D);
+  Serial.print(", y_D = ");
+  Serial.println(y_D);
   delay(100);
+
+
+
+//Club
+
+  x_C = analogRead(VRX_PIN_Club);
+  y_C = analogRead(VRY_PIN_Club);
+  // Read the button value
+  b_C = button_Club.getState();
+
+  if (button_Club.isPressed()) {
+    Serial.println("The button is pressed");
+    wasPressedClub = true;
+    // TODO do something here
+  }
+
+  if (button_Club.isReleased()) {
+    Serial.println("The button is released");
+    // TODO do something here
+    wasPressedClub = !wasPressedClub;
+  }
+
 }
 
 //Functions
