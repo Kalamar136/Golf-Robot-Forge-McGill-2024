@@ -1,11 +1,14 @@
 #include <ezButton.h>
 #include <Servo.h>
 
-#define L_1A 3
-#define L_1B 2
-#define R_1A 4
-#define R_1B 5
+//Left motor
+#define L_1A A2
+#define L_1B A3
+//Right motor
+#define R_1A A0
+#define R_1B A1
 
+//Servo pins
 #define ClubPin = 3;
 int stop = 90;
 Servo Club;
@@ -38,11 +41,57 @@ void setup() {
   button.setDebounceTime(50); // set debounce time to 50 milliseconds
 }
 
-void forward() {
-  digitalWrite(L_1A, LOW);
-  digitalWrite(L_1B, HIGH);
-  digitalWrite(R_1A, LOW);
-  digitalWrite(R_1B, HIGH);
+//function signatures
+void forward();
+void right();
+void left();
+void backward();
+void brake();
+
+void loop() {
+
+  //myservo.write(45);
+  //delay(2000);
+
+  //myservo.write(135);
+  //delay(2000);
+
+  //myservo.write(90);
+  //delay(2000);
+
+  // put your main code here, to run repeatedly:
+  button.loop(); // MUST call the loop() function first
+  x = analogRead(VRX_PIN);
+  y = analogRead(VRY_PIN);
+  // Read the button value
+  b = button.getState();
+
+  if (button.isPressed()) {
+    Serial.println("The button is pressed");
+    // TODO do something here
+  }
+
+  if (button.isReleased()) {
+    Serial.println("The button is released");
+    // TODO do something here
+    wasPressed = !wasPressed;
+  }
+
+  forward(x);
+  Serial.print("x = ");
+  Serial.print(x);
+  Serial.print(", y = ");
+  Serial.println(y);
+  delay(100);
+}
+
+//Functions
+
+void forward(int speed) {
+  analogWrite(L_1A, abs(speed-513)/2);
+  analogWrite(L_1B, abs(speed-513)/2);
+  analogWrite(R_1A, abs(speed-513)/2);
+  analogWrite(R_1B, abs(speed-513)/2);
   delay(100);
 }
 
@@ -77,70 +126,3 @@ void brake() {
   digitalWrite(R_1B, LOW);
   delay(100);
 }
-
-void loop() {
-
-  //myservo.write(45);
-  //delay(2000);
-
-  //myservo.write(135);
-  //delay(2000);
-
-  //myservo.write(90);
-  //delay(2000);
-
-  // put your main code here, to run repeatedly:
-  button.loop(); // MUST call the loop() function first
-  x = analogRead(VRX_PIN);
-  y = analogRead(VRY_PIN);
-  // Read the button value
-  b = button.getState();
-
-  if (button.isPressed()) {
-    Serial.println("The button is pressed");
-    // TODO do something here
-  }
-
-  if (button.isReleased()) {
-    Serial.println("The button is released");
-    // TODO do something here
-    wasPressed = !wasPressed;
-  }
-
-  if (!wasPressed) {
-    brake();
-  } else {
-    if (x > 950) {
-      right();
-    } else if (x < 74) {
-      left();
-    } else if (y > 950) {
-      forward();
-    } else if (y < 74) {
-      backward();
-    } else {
-      brake();
-    }
-  }
-  Serial.print("x = ");
-  Serial.print(x);
-  Serial.print(", y = ");
-  Serial.println(y);
-  delay(100);
-}
-
-//Functions
-
-
-
-
-
-
-
-
-
-
-
-
-
-
