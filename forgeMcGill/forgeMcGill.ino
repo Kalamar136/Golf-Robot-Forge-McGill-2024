@@ -18,8 +18,8 @@ Servo Club;
 #define SW_PIN_Drive 8  // Arduino pin connected to SW1  pin
 ezButton button_Drive(SW_PIN_Drive);
 
-#define VRX_PIN_Club A6 // Arduino pin connected to VRX1 pin
-#define VRY_PIN_Club A7 // Arduino pin connected to VRY1 pin
+
+#define VRY_PIN_Club A6 // Arduino pin connected to VRY1 pin
 #define SW_PIN_Club 9  // Arduino pin connected to SW1  pin
 ezButton button_Club(SW_PIN_Club);
 
@@ -28,7 +28,7 @@ int y_D = 0;
 int b_D = 0;
 bool wasPressedDrive = false;
 
-int x_C = 0;
+
 int y_C = 0;
 int b_C = 0;
 int position_C = 0;
@@ -91,13 +91,13 @@ void loop() {
   Serial.print(x_D);
   Serial.print(", y_D = ");
   Serial.println(y_D);
-  delay(100);
+  
 
 
 
 //Club
 
-  x_C = analogRead(VRX_PIN_Club);
+  
   y_C = analogRead(VRY_PIN_Club);
   // Read the button value
   b_C = button_Club.getState();
@@ -110,12 +110,12 @@ void loop() {
 
     //move the club forward
     if((y_C >= 768) && (position_C > 0)){
-      moveClub(1);
+      moveClub(-1);
       position_C -= 1;
     }
     //move the club backwards
     else if(y_C <= 256){
-      moveClub(-1);
+      moveClub(1);
       position_C += 1;
     }
     else{
@@ -129,6 +129,10 @@ void loop() {
     wasPressedClub = !wasPressedClub;
   }
 
+  
+  Serial.print(", y_C = ");
+  Serial.println(y_C);
+  delay(100);
 }
 
 //Functions
@@ -180,7 +184,7 @@ void shoot(){
 }
 
 void moveClub(int direction){
-  myservo.write(90 + direction*45);
+  myservo.write(90 - direction*45);
   delay(200);
   myservo.write(90);
 
