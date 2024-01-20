@@ -31,6 +31,7 @@ bool wasPressedDrive = false;
 int x_C = 0;
 int y_C = 0;
 int b_C = 0;
+int position_C = 0;
 bool wasPressedClub = false;
 
 void setup() {
@@ -61,15 +62,6 @@ void moveClub(int angle);
 
 void loop() {
 
-  //myservo.write(45);
-  //delay(2000);
-
-  //myservo.write(135);
-  //delay(2000);
-
-  //myservo.write(90);
-  //delay(2000);
-
   // put your main code here, to run repeatedly:
   button_Drive.loop(); // MUST call the loop() function first
   button_Club.loop(); // MUST call the loop() function first
@@ -82,9 +74,6 @@ void loop() {
 
   if (button_Drive.isPressed()) {
     Serial.println("The drive button is pressed");
-    Serial.println("Shoot!");
-    shoot();
-
     wasPressedDrive = true;
     // TODO do something here
   }
@@ -93,6 +82,8 @@ void loop() {
     Serial.println("The drive button is released");
     // TODO do something here
     wasPressedDrive = !wasPressedDrive;
+    Serial.println("Shoot!");
+    shoot();
   }
 
   forward(x_D);
@@ -116,11 +107,16 @@ void loop() {
     wasPressedClub = true;
 
     // TODO do something here
-    if(y_C >= 768){
-      moveClub(10);
+
+    //move the club forward
+    if((y_C >= 768) && (position_C > 0)){
+      moveClub(1);
+      position_C -= 1;
     }
+    //move the club backwards
     else if(y_C <= 256){
-      moveClub(-10);
+      moveClub(-1);
+      position_C += 1;
     }
     else{
 
@@ -178,8 +174,14 @@ void brake() {
 }
 
 void shoot(){
-
+  myservo.write(135);
+  delay(200*position_C);
+  myservo.write(90);
 }
-void moveClub(int angle){
-  
+
+void moveClub(int direction){
+  myservo.write(90 + direction*45);
+  delay(200);
+  myservo.write(90);
+
 }
