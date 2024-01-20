@@ -38,10 +38,45 @@ void setup() {
   button.setDebounceTime(50); // set debounce time to 50 milliseconds
 }
 
-//Function signatures
-void forward(int A_1A, int A_1B);
-void backward(int A_1A, int A_1B);
-void brake(int A_1A, int A_1B);
+void forward() {
+  digitalWrite(L_1A, LOW);
+  digitalWrite(L_1B, HIGH);
+  digitalWrite(R_1A, LOW);
+  digitalWrite(R_1B, HIGH);
+  delay(100);
+}
+
+void right() {
+  digitalWrite(L_1A, LOW);
+  digitalWrite(L_1B, HIGH);
+  digitalWrite(R_1A, HIGH);
+  digitalWrite(R_1B, LOW);
+  delay(100);
+}
+
+void left() {
+  digitalWrite(L_1A, HIGH);
+  digitalWrite(L_1B, LOW);
+  digitalWrite(R_1A, LOW);
+  digitalWrite(R_1B, HIGH);
+  delay(100);
+}
+
+void backward() {
+  digitalWrite(L_1A, HIGH);
+  digitalWrite(L_1B, LOW);
+  digitalWrite(R_1A, HIGH);
+  digitalWrite(R_1B, LOW);
+  delay(100);
+}
+
+void brake() {
+  digitalWrite(L_1A, LOW);
+  digitalWrite(L_1B, LOW);
+  digitalWrite(R_1A, LOW);
+  digitalWrite(R_1B, LOW);
+  delay(100);
+}
 
 void loop() {
 
@@ -95,48 +130,6 @@ void loop() {
 }
 
 //Functions
-
-void forward() {
-  digitalWrite(L_1A, LOW);
-  digitalWrite(L_1B, HIGH);
-  digitalWrite(R_1A, LOW);
-  digitalWrite(R_1B, HIGH);
-  delay(100);
-}
-
-void right() {
-  digitalWrite(L_1A, LOW);
-  digitalWrite(L_1B, HIGH);
-  digitalWrite(R_1A, HIGH);
-  digitalWrite(R_1B, LOW);
-  delay(100);
-}
-
-void left() {
-  digitalWrite(L_1A, HIGH);
-  digitalWrite(L_1B, LOW);
-  digitalWrite(R_1A, LOW);
-  digitalWrite(R_1B, HIGH);
-  delay(100);
-}
-
-void backward() {
-  digitalWrite(L_1A, HIGH);
-  digitalWrite(L_1B, LOW);
-  digitalWrite(R_1A, HIGH);
-  digitalWrite(R_1B, LOW);
-  delay(100);
-}
-
-void brake() {
-  digitalWrite(L_1A, LOW);
-  digitalWrite(L_1B, LOW);
-  digitalWrite(R_1A, LOW);
-  digitalWrite(R_1B, LOW);
-  delay(100);
-}
-
-
 
 
 
