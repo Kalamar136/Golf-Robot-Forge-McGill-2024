@@ -200,13 +200,14 @@ void brake() {
 
 void shoot(){
   Club.write(135);
-  delay(200*position_C);
+  delay(100*position_C);
   Club.write(90);
+  position_C = 0;
 }
 
 void moveClub(int direction){
   Club.write(90 - direction*45);
-  delay(200);
+  delay(100);
   Club.write(90);
 
 }
