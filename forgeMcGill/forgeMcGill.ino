@@ -46,7 +46,8 @@ void setup() {
 
   Serial.begin(9600);
   
-  button.setDebounceTime(50); // set debounce time to 50 milliseconds
+  button_Drive.setDebounceTime(50); // set debounce time to 50 milliseconds
+  button_Club.setDebounceTime(50); // set debounce time to 50 milliseconds
 }
 
 //function signatures
@@ -55,6 +56,8 @@ void right();
 void left();
 void backward();
 void brake();
+void shoot();
+void moveClub(int angle);
 
 void loop() {
 
@@ -78,13 +81,16 @@ void loop() {
   b_D = button_Drive.getState();
 
   if (button_Drive.isPressed()) {
-    Serial.println("The button is pressed");
+    Serial.println("The drive button is pressed");
+    Serial.println("Shoot!");
+    shoot();
+
     wasPressedDrive = true;
     // TODO do something here
   }
 
   if (button_Drive.isReleased()) {
-    Serial.println("The button is released");
+    Serial.println("The drive button is released");
     // TODO do something here
     wasPressedDrive = !wasPressedDrive;
   }
@@ -106,13 +112,23 @@ void loop() {
   b_C = button_Club.getState();
 
   if (button_Club.isPressed()) {
-    Serial.println("The button is pressed");
+    Serial.println("The club button is pressed");
     wasPressedClub = true;
+
     // TODO do something here
+    if(y_C >= 768){
+      moveClub(10);
+    }
+    else if(y_C <= 256){
+      moveClub(-10);
+    }
+    else{
+
+    }
   }
 
   if (button_Club.isReleased()) {
-    Serial.println("The button is released");
+    Serial.println("The club button is released");
     // TODO do something here
     wasPressedClub = !wasPressedClub;
   }
@@ -159,4 +175,11 @@ void brake() {
   digitalWrite(R_1A, LOW);
   digitalWrite(R_1B, LOW);
   delay(100);
+}
+
+void shoot(){
+
+}
+void moveClub(int angle){
+  
 }
