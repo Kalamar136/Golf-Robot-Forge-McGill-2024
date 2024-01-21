@@ -2,8 +2,8 @@
 #include <Servo.h>
 
 //Left motor
-#define L_1A 9
-#define L_1B 3
+#define L_1A 3
+#define L_1B 6
 //Right motor
 #define R_1A 10
 #define R_1B 11
@@ -15,13 +15,14 @@ Servo Club;
 //Drive Joystick
 #define VRX_PIN_Drive A4 // Arduino pin connected to VRX1 pin
 #define VRY_PIN_Drive A5 // Arduino pin connected to VRY1 pin
-#define SW_PIN_Drive 8  // Arduino pin connected to SW1  pin
+#define SW_PIN_Drive 7  // Arduino pin connected to SW1  pin
 ezButton button_Drive(SW_PIN_Drive);
 
 #define stop 0
 #define delayTime 100
 
 #define VRY_PIN_Club A3 // Arduino pin connected to VRY1 pin
+#define VRX_PIN_Club A2 // Arduino pin connected to VRY1 pin
 #define SW_PIN_Club 2  // Arduino pin connected to SW1  pin
 ezButton button_Club(SW_PIN_Club);
 
@@ -33,6 +34,7 @@ long speed;
 
 
 int y_C = 0;
+int x_C = 0;
 int b_C = 0;
 int position_C = 0;
 bool wasPressedClub = false;
@@ -45,7 +47,7 @@ void setup() {
   pinMode(R_1B, OUTPUT);
   
   //Club setup
-  Club.attach(6);
+  Club.attach(5);
   Club.write(90);
 
   Serial.begin(9600);
@@ -80,22 +82,22 @@ void loop() {
   if (speedt < 30) {
     speed = 0;
   } else if (speedt <= 256){
-    speed = 80;
+    speed = 150;
   } else {
-    speed = 120;
+    speed = 200;
   }
   
   if (y_D >= x_D && y_D >= 1024-x_D) {
-    backward(speed);
-    
-  } else if (y_D <= x_D && y_D <= 1024-x_D) {
-    forward(speed);
-    
-  } else if (y_D <= x_D && y_D >= 1024-x_D) {
     right(speed);
     
-  } else {
+  } else if (y_D <= x_D && y_D <= 1024-x_D) {
     left(speed);
+    
+  } else if (y_D <= x_D && y_D >= 1024-x_D) {
+    forward(speed);
+    
+  } else {
+    backward(speed);
     
   }
   
@@ -122,6 +124,7 @@ void loop() {
     shoot();
   }
   y_C = analogRead(VRY_PIN_Club);
+  x_C = analogRead(VRX_PIN_Club);
   // Read the button value
   b_C = button_Club.getState();
 
@@ -132,14 +135,18 @@ void loop() {
     // TODO do something here
 
     //move the club forward
-    if((y_C >= 768) && (position_C > 0)){
+    if((y_C <= 256) && (position_C > 0)){
       moveClub(-1);
       position_C -= 1;
     }
     //move the club backwards
-    else if(y_C <= 256){
+    else if(y_C >= 800){
       moveClub(1);
       position_C += 1;
+    } else if (x_C >= 800) {
+      moveClub(-1);
+    } else if (x_C <= 256) {
+      moveClub(1);
     }
   }
 
@@ -151,7 +158,7 @@ void loop() {
 
   Serial.print(", y_C = ");
   Serial.println(y_C);
-  delay(1000);
+  delay(150);
 }
 
 
@@ -168,7 +175,7 @@ void forward(long speed) {
 void right(long speed) {
   analogWrite(L_1A, stop);
   analogWrite(L_1B, speed);
-  analogWrite(R_1A, speed);
+  digitalWrite(R_1A, speed);
   analogWrite(R_1B, stop);
   Serial.println("right");
 }
@@ -199,8 +206,15 @@ void brake() {
 
 void shoot(){
   Club.write(135);
-  delay(100*position_C);
+  delay(90*(position_C));
+  Club.write(90+position_C*15);
+  delay(100);
   Club.write(90);
+  delay(400);
+  Club.write(90-position_C*15);
+  delay(100);
+  Club.write(90);
+
   position_C = 0;
 }
 
@@ -208,5 +222,6 @@ void moveClub(int direction){
   Club.write(90 - direction*45);
   delay(100);
   Club.write(90);
-
+  Serial.println("supposed to move");
+  delay(600);
 }
